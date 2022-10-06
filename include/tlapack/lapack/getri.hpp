@@ -39,31 +39,28 @@ namespace tlapack {
  *
  * @ingroup group_solve
  */
-template< class matrix_t, class vector_t >
-int getri( matrix_t& A, vector_t &Piv){
+template< class matrix_t>
+int getri( matrix_t& A){
     using idx_t = size_type< matrix_t >;
     using T = type_t<matrix_t>;
     using real_t = real_type<T>;
 
-    // constants
-    const idx_t m = nrows(A);
-    const idx_t n = ncols(A);
-    const idx_t end = std::min<idx_t>( m, n );
-
     // check arguments
     tlapack_check_false( access_denied( dense, write_policy(A) ) );
-    tlapack_check( (idx_t) size(Piv) >= end);
-    // quick return
+    tlapack_check( nrows(A)==ncols(A));
     
-    if (m!=n) return -1;
+    // constant n, number of rows and also columns of A
+    const idx_t n = ncols(A);
+
+    // initialize a pivot vector and run getrf2 on A
+    std::vector<idx_t> Piv( n , idx_t(0) );
     int not_inv=getrf2(A,Piv);
     
-    // not_inv is the return int of LU and if it is not zero, it means that our matrix is not invertible
+    // not_inv is the return integer of LU and if it is not zero, it means that our matrix is not invertible
     if(not_inv!=0){
         return -1;
     }
 
-    
     // A has L and U in it, we will create X such that UXL=A in place of
     for(idx_t j=n-idx_t(1);j!=idx_t(-1);j--){
         if(j==n-1){
@@ -81,7 +78,6 @@ int getri( matrix_t& A, vector_t &Piv){
             // work1 = -X22 * l21
             std::vector<T> work1( n-j-idx_t(1) , T(0));
             tlapack::gemv(Op::NoTrans,T(-1), X22, l21,T(0), work1);
-            // std::cout<<nrows(X22)<<std::endl;
             
             //second line of the algorithm, work2 holds x21
             // work2 = -u12 X22 / A(j,j)

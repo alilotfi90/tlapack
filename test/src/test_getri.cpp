@@ -29,25 +29,24 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     
     // m and n represent no. rows and columns of the matrices we will be testing respectively
     idx_t m, n;
-    m = GENERATE(100);
-    n = GENERATE(100);
-    idx_t k=min<idx_t>(m,n);
+    // m = GENERATE(100);
+    n = GENERATE(5,10,20,100);
 
     // eps is the machine precision, and tol is the tolerance we accept for tests to pass
     const real_t eps = ulp<real_t>();
-    const real_t tol = max(m, n)*max(m, n)*eps;
+    const real_t tol = n*n*eps;
     
     // Initialize matrices A, and A_copy to run tests on
-    std::unique_ptr<T[]> A_(new T[m * n]);
-    std::unique_ptr<T[]> A_copy_(new T[m * n]);
-    auto A = legacyMatrix<T, layout<matrix_t>>(m, n, &A_[0], layout<matrix_t> == Layout::ColMajor ? m : n);
-    auto A_copy = legacyMatrix<T, layout<matrix_t>>(m, n, &A_copy_[0], layout<matrix_t> == Layout::ColMajor ? m : n);
+    std::unique_ptr<T[]> A_(new T[n * n]);
+    std::unique_ptr<T[]> A_copy_(new T[n * n]);
+    auto A = legacyMatrix<T, layout<matrix_t>>(n, n, &A_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
+    auto A_copy = legacyMatrix<T, layout<matrix_t>>(n, n, &A_copy_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
     
     // building identity matrix
-    std::unique_ptr<T[]> ident1_(new T[m * n]);
-    auto ident1 = legacyMatrix<T, layout<matrix_t>>(m, n, &ident1_[0], layout<matrix_t> == Layout::ColMajor ? m : n);
+    std::unique_ptr<T[]> ident1_(new T[n * n]);
+    auto ident1 = legacyMatrix<T, layout<matrix_t>>(n, n, &ident1_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
     for (idx_t j = 0; j < n; ++j)
-        for (idx_t i = 0; i < m; ++i){
+        for (idx_t i = 0; i < n; ++i){
             if(i==j){
                 ident1(i, j) = T(1);
             }
@@ -60,7 +59,7 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     
     // forming A, a random matrix 
     for (idx_t j = 0; j < n; ++j)
-        for (idx_t i = 0; i < m; ++i){
+        for (idx_t i = 0; i < n; ++i){
             A(i, j) = rand_helper<T>();
         }
             
@@ -72,11 +71,10 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     // save norm of norma
     double norma=tlapack::lange( tlapack::Norm::Max, A);
     
-    // Initialize Piv vector to all zeros
-    std::vector<idx_t> Piv( k , idx_t(0) );
-    getri(A,Piv);
+    // run inverse function of choice
+    getri(A);
     
-    // identit1 -----> A * A_copy - ident1
+    // identit1 <----- A * A_copy - ident1
     gemm(Op::NoTrans,Op::NoTrans,real_t(1),A,A_copy,real_t(-1),ident1);
     
        
