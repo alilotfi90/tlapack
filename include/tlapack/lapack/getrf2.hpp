@@ -51,6 +51,7 @@ namespace tlapack {
      */
     template< class matrix_t, class vector_t >
     int getrf2( matrix_t& A, vector_t &Piv){
+        
         using idx_t = size_type< matrix_t >;
         using T = type_t<matrix_t>;
         using real_t = real_type<T>;
@@ -63,9 +64,11 @@ namespace tlapack {
         // check arguments
         tlapack_check_false( access_denied( dense, write_policy(A) ) );
         tlapack_check( (idx_t) size(Piv) >= end);
+        
         // quick return
         if (m<=0 || n <= 0) return 0;
         // base case of recursion; one column matrices or one row matrices
+        
         if (m==1 || n ==1){
             // one row matrices
             if(m==1){
@@ -82,16 +85,19 @@ namespace tlapack {
                 idx_t toswap = idx_t(0);
                 toswap=iamax(tlapack::slice(A,tlapack::range<idx_t>(0,m),0));
                 Piv[0]=toswap;
+                
                 // in the following case all elements are zero, and we return 1
                 if (A(Piv[0],0)==real_t(0)){
                     return 1;
                 }
+                
                 // in this case, we can safely swap since A(Piv[0],0) is not zero
                 if (Piv[0]!=0){
                     auto vect1=tlapack::row(A,0);
                     auto vect2=tlapack::row(A,toswap);
                     tlapack::swap(vect1,vect2);
                 }
+                
                 // by the previous comment, we can safely divide by A(0,0) and finish the base case of the algorithm
                 for(idx_t i=1;i<m;i++){
                     A(i,0)/=A(0,0);
@@ -107,6 +113,7 @@ namespace tlapack {
             auto A0 = tlapack::slice(A,tlapack::range<idx_t>(0,m),tlapack::range<idx_t>(0,m));
             auto A1 = tlapack::slice(A,tlapack::range<idx_t>(0,m),tlapack::range<idx_t>(m,n));
             getrf2(A0,Piv);
+            
             // swap the rows of A1 according to Piv
             for(idx_t j=0;j<size(Piv);j++){
                 if (Piv[j]>j){
@@ -115,6 +122,7 @@ namespace tlapack {
                     tlapack::swap(vect1,vect2);
                 }   
             }
+            
             // Solve triangular system A0 X = A1 and update A1
             trsm(Side::Left,Uplo::Lower,Op::NoTrans,Diag::Unit,T(1),A0,A1);
             return 0;
@@ -146,13 +154,16 @@ namespace tlapack {
                 }   
             }
             
-            // Define the four blocks:
+            // partition A into the following four blocks:
             //A00
             auto A00 = tlapack::slice(A,tlapack::range<idx_t>(0,k0),tlapack::range<idx_t>(0,k0));
+            
             //A01
             auto A01 = tlapack::slice(A,tlapack::range<idx_t>(0,k0),tlapack::range<idx_t>(k0,n));
+            
             //A10
             auto A10 = tlapack::slice(A,tlapack::range<idx_t>(k0,m),tlapack::range<idx_t>(0,k0));
+            
             //A11
             auto A11 = tlapack::slice(A,tlapack::range<idx_t>(k0,m),tlapack::range<idx_t>(k0,n));
 
