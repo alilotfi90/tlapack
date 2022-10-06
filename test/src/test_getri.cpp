@@ -28,7 +28,7 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     typedef real_type<T> real_t; // equivalent to using real_t = real_type<T>;
     
     // m and n represent no. rows and columns of the matrices we will be testing respectively
-    idx_t m, n;
+    idx_t n;
     // m = GENERATE(100);
     n = GENERATE(5,10,20,100);
 
