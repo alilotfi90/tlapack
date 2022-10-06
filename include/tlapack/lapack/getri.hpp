@@ -1,12 +1,12 @@
 /// @file getri.hpp
 /// @author Ali Lotfi, University of Colorado Denver, USA
 //
-// Copyright (c) 2013-2022, University of Colorado Denver. All rights reserved.
+// Copyright (c) 2022, University of Colorado Denver. All rights reserved.
 //
 // This file is part of <T>LAPACK.
 // <T>LAPACK is free software: you can redistribute it and/or modify it under
 // the terms of the BSD 3-Clause license. See the accompanying LICENSE file.
-// PA = LU   A^(-1)P^T=U^(-1)L^(-1) --- > U(A^(-1)P^T) L=I
+// PA = LU,   then A^(-1) is the solution to U (XP^T) L = I
 #ifndef TLAPACK_GETRI_HH
 #define TLAPACK_GETRI_HH
 
@@ -107,7 +107,7 @@ int getri( matrix_t& A, vector_t &Piv){
     
     return 0;
     
-} // getrf2
+} // getri
 
 } // lapack
 
