@@ -1,4 +1,4 @@
-/// @file getri.hpp
+/// @file getri_methodC.hpp
 /// @author Ali Lotfi, University of Colorado Denver, USA
 //
 // Copyright (c) 2022, University of Colorado Denver. All rights reserved.
@@ -7,8 +7,8 @@
 // <T>LAPACK is free software: you can redistribute it and/or modify it under
 // the terms of the BSD 3-Clause license. See the accompanying LICENSE file.
 // PA = LU,   then A^(-1) is the solution to U (XP^T) L = I
-#ifndef TLAPACK_GETRI_HH
-#define TLAPACK_GETRI_HH
+#ifndef TLAPACK_GETRI_methodC_HH
+#define TLAPACK_GETRI_methodC_HH
 
 #include "tlapack/base/utils.hpp"
 #include "tlapack.hpp"
@@ -36,7 +36,7 @@ namespace tlapack {
  * @ingroup group_solve
  */
 template< class matrix_t>
-int getri_method( matrix_t& A){
+int getri_methodC( matrix_t& A){
     using idx_t = size_type< matrix_t >;
     using T = type_t<matrix_t>;
     using real_t = real_type<T>;
@@ -99,7 +99,7 @@ int getri_method( matrix_t& A){
     
     return 0;
     
-} // getri_method
+} // getri_methodC
 
 } // lapack
 

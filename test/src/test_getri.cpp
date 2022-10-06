@@ -1,5 +1,5 @@
 /// @file test_getri.cpp
-/// @brief Test GELQF and UNGL2 and output a k-by-n orthogonal matrix Q.
+/// @brief Test functions that calculate inverse of matrices such as getri family.
 //
 // Copyright (c) 2022, University of Colorado Denver. All rights reserved.
 //
@@ -11,9 +11,9 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <tlapack/plugins/stdvector.hpp>
 #include <tlapack/plugins/legacyArray.hpp>
-#include <tlapack/lapack/getrf2.hpp>
 #include <testutils.hpp>
 #include <testdefinitions.hpp>
+#include "tlapack/lapack/getri_methodC.hpp"
 
 using namespace tlapack;
 using namespace std;
@@ -27,9 +27,8 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     using range = std::pair<idx_t, idx_t>;
     typedef real_type<T> real_t; // equivalent to using real_t = real_type<T>;
     
-    // m and n represent no. rows and columns of the matrices we will be testing respectively
+    //n represent no. rows and columns of the square matrices we will performing tests on
     idx_t n;
-    // m = GENERATE(100);
     n = GENERATE(5,10,20,100);
 
     // eps is the machine precision, and tol is the tolerance we accept for tests to pass
@@ -64,7 +63,6 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
         }
             
 
-    
     // make a deep copy A
     lacpy(Uplo::General, A, A_copy);
     
@@ -72,7 +70,7 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     double norma=tlapack::lange( tlapack::Norm::Max, A);
     
     // run inverse function of choice
-    getri(A);
+    getri_methodC(A);
     
     // identit1 <----- A * A_copy - ident1
     gemm(Op::NoTrans,Op::NoTrans,real_t(1),A,A_copy,real_t(-1),ident1);
