@@ -1,5 +1,5 @@
 /// @file getrf_recursive.hpp
-/// @author Ali Lotfi, University of Colorado Denver, USA
+/// @author Weslley(Algorithm design), Ali, University of Colorado Denver, USA
 //
 // Copyright (c) 2022, University of Colorado Denver. All rights reserved.
 //

@@ -72,8 +72,7 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     getrf_recursive(A,Piv);
 
     // run inverse function, this could test any inverse function of choice
-    std::vector<T> work( n , T(0) );
-    getri_uxli(A,Piv,work);
+    getri_uxli_recursive(A,Piv);
     
     // identit1 -----> A * A_copy - ident1
     gemm(Op::NoTrans,Op::NoTrans,real_t(1),A,A_copy,real_t(-1),ident1);
