@@ -160,6 +160,6 @@
 
 
 #include "tlapack/lapack/getri_uxli_recursive.hpp"
-
+#include "tlapack/lapack/getri_uxlinv_recursive.hpp"
 
 #endif // TLAPACK_HH
