@@ -20,7 +20,7 @@
 
 namespace tlapack {
 
-/** getri_uxli_recursive is the recursive version of getri_uxli, it was devleped by Dr. Weslley Pereira 
+/** getri_uxli_recursive is the recursive version of getri_uxli, it was developed by Dr. Weslley Pereira 
  *  getri_uxli_recursive computes the inverse of a general n-by-n matrix A recursively
  *  the L and U factors of a matrix is given on the input
  *  then we solve for X in the following equation
