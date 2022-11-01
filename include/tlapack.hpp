@@ -160,6 +160,10 @@
 
 
 #include "tlapack/lapack/getri_uxli_recursive.hpp"
-#include "tlapack/lapack/getri_uxlinv_recursive.hpp"
+#include "tlapack/lapack/ipuxl.hpp"
+
+// Inplace square multiplication
+
+#include "tlapack/lapack/ismm.hpp"
 
 #endif // TLAPACK_HH

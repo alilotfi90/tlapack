@@ -26,7 +26,7 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     
     //n represent no. rows and columns of the square matrices we will performing tests on
     idx_t n;
-    n = GENERATE(5,10,20,100);
+    n = GENERATE(1,2,3,4,5,10,20,100);
 
     // eps is the machine precision, and tol is the tolerance we accept for tests to pass
     const real_t eps = ulp<real_t>();
@@ -36,63 +36,86 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     std::unique_ptr<T[]> A_(new T[n * n]);
     std::unique_ptr<T[]> A_copy_(new T[n * n]);
     auto A = legacyMatrix<T, layout<matrix_t>>(n, n, &A_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
-    auto A_copy = legacyMatrix<T, layout<matrix_t>>(n, n, &A_copy_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
-    
-    // building identity matrix
-    std::unique_ptr<T[]> ident1_(new T[n * n]);
-    auto ident1 = legacyMatrix<T, layout<matrix_t>>(n, n, &ident1_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
-    for (idx_t j = 0; j < n; ++j)
-        for (idx_t i = 0; i < n; ++i){
-            if(i==j){
-                ident1(i, j) = T(1);
-            }
-            else{
-                ident1(i, j) = T(0);
-            }
-            
-        }
+    //auto X = legacyMatrix<T, layout<matrix_t>>(n, n, &X_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
 
     
     // forming A, a random matrix 
     for (idx_t j = 0; j < n; ++j)
         for (idx_t i = 0; i < n; ++i){
             A(i, j) = rand_helper<T>();
+            // if(i==j){
+            //     A(i,j)=T(0);
+            // }
         }
+    
 
-    
-    // make a deep copy A
-    lacpy(Uplo::General, A, A_copy);
-    
     // calculate norm of A for later use in relative error
     double norma=tlapack::lange( tlapack::Norm::Max, A);
-    
-    
-    // LU factorize Pivoted A
-    std::vector<idx_t> Piv( n , idx_t(0) );
-    getrf_recursive(A,Piv);
 
-    // run inverse function, this could test any inverse function of choice
-    ipuxl(A);
-    
-    // swap columns of X to find A^{-1} since A^{-1}=X P
-    for(idx_t j=n-idx_t(1);j!=idx_t(-1);j--){
-        if(Piv[j]>j){
-            auto vect1=tlapack::col(A,j);
-            auto vect2=tlapack::col(A,Piv[j]);
-            tlapack::swap(vect1,vect2);
+    // building identity matrix
+    std::unique_ptr<T[]> U_(new T[n * n]);
+    auto U = legacyMatrix<T, layout<matrix_t>>(n, n, &U_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
+    for (idx_t j = 0; j < n; ++j)
+        for (idx_t i = 0; i < n; ++i){
+            if(i<=j){
+                U(i, j) = A(i,j);
+            }
+            else{
+                U(i, j) = T(0);
+            }
+            
         }
-    }
+
+    // tlapack::trtri_recursive( Uplo::Lower, Diag::Unit, A );
+    
+    // building identity matrix
+    std::unique_ptr<T[]> L_(new T[n * n]);
+    auto L = legacyMatrix<T, layout<matrix_t>>(n, n, &L_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
+    for (idx_t j = 0; j < n; ++j)
+        for (idx_t i = 0; i < n; ++i){
+            if(i>j){
+                L(i, j) = A(i,j);
+            }
+            else{
+                if(i==j){
+                    L(i,j)=T(1);
+                }
+                else{
+                    L(i, j) = T(0);
+                }
+                
+            }
+            
+        }
+    
+    // make a deep copy A
+    //lacpy(Uplo::General, A, A_copy);
+    
+    ipuxl(A);
+
+    trsm(Side::Left,Uplo::Upper,Op::NoTrans,Diag::NonUnit,T(1),U,L);
+    
+    
     
     
     
     // identit1 -----> A * A_copy - ident1
-    gemm(Op::NoTrans,Op::NoTrans,real_t(1),A,A_copy,real_t(-1),ident1);
-    
+    //gemm(Op::NoTrans,Op::NoTrans,real_t(1),A,A_copy,real_t(-1),L);
+    for (idx_t j = 0; j < n; ++j)
+        for (idx_t i = 0; i < n; ++i){
+            L(i,j)=L(i,j)-A(i,j);
+            
+        }
+
+
+
     // error1 is  || A * A_copy - ident1 || / ||A||   
-    real_t error1 = tlapack::lange( tlapack::Norm::Max, ident1)/norma;
+    real_t error1 = tlapack::lange( tlapack::Norm::Max, L)/norma;
     
+    INFO( "n = " << n );
+
     // following tests if error1<=tol
-    CHECK(error1/tol <= 1);
+    CHECK(error1 <= tol);
     
 }
 

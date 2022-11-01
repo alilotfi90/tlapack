@@ -7,8 +7,8 @@
 // <T>LAPACK is free software: you can redistribute it and/or modify it under
 // the terms of the BSD 3-Clause license. See the accompanying LICENSE file.
 
-#ifndef TLAPACK_GETRI_UXLINV_RECURSIVE_HH
-#define TLAPACK_GETRI_UXLINV_RECURSIVE_HH
+#ifndef TLAPACK_IPUXL_HH
+#define TLAPACK_IPUXL_HH
 
 #include "tlapack/base/utils.hpp"
 
@@ -17,6 +17,7 @@
 #include "tlapack/blas/copy.hpp"
 #include "tlapack/blas/swap.hpp"
 #include "tlapack/blas/gemm.hpp"
+//#include "tlapack/lapack/ismm.hpp"
 
 namespace tlapack {
 
@@ -42,7 +43,7 @@ namespace tlapack {
  * @ingroup group_solve
  */
 template< class matrix_t>
-int getri_uxlinv_recursive( matrix_t& A){
+int ipuxl1( matrix_t& A){
     using idx_t = size_type< matrix_t >;
     using T = type_t<matrix_t>;
 
@@ -53,39 +54,13 @@ int getri_uxlinv_recursive( matrix_t& A){
     // constant n, number of rows and also columns of A
     const idx_t n = ncols(A);
 
-    if(n==1){
-        // 1-by-1 non-invertible case
-        if(A(0,0)==T(0))
-            return 1;
-        // inverse of 1-by-1 case
-        A(0,0) = T(1)/A(0,0); 
-    }
-    else{
-        
-        idx_t k0 = n/2;
-        
-        auto X00 = tlapack::slice(A,tlapack::range<idx_t>(0,k0),tlapack::range<idx_t>(0,k0));
-        auto X01 = tlapack::slice(A,tlapack::range<idx_t>(0,k0),tlapack::range<idx_t>(k0,n));
-        auto X10 = tlapack::slice(A,tlapack::range<idx_t>(k0,n),tlapack::range<idx_t>(0,k0));
-        auto X11 = tlapack::slice(A,tlapack::range<idx_t>(k0,n),tlapack::range<idx_t>(k0,n));    
     
-        //step1:
-        // X10 <--- X11^{-1} X10
-        trsm(Side::Left,Uplo::Upper,Op::NoTrans,Diag::NonUnit,T(-1),X11,X10);
-
-        //step2:
-        // recursive call
-        getri_uxlinv_recursive(X11);
     
-    }
-        
-    return 0;
-    
-} // getri_uxlinv_recursive
+} // ipuxl
 
 } // lapack
 
-#endif // TLAPACK_GETRI_UXLINV_RECURSIVE_HH
+#endif // TLAPACK_IPUXL_HH
 
 
 
