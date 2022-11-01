@@ -161,6 +161,7 @@
 
 #include "tlapack/lapack/getri_uxli_recursive.hpp"
 #include "tlapack/lapack/ipuxl.hpp"
+#include "tlapack/lapack/getri_uxlinv_recursive.hpp"
 
 // Inplace square multiplication
 

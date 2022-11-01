@@ -10,6 +10,7 @@
 #include <tlapack/plugins/stdvector.hpp>
 #include <tlapack/plugins/legacyArray.hpp>
 #include <tlapack/lapack/getrf_recursive.hpp>
+#include <tlapack/lapack/getri_uxlinv_recursive.hpp>
 #include <testutils.hpp>
 #include <testdefinitions.hpp>
 
@@ -72,7 +73,7 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     getrf_recursive(A,Piv);
 
     // run inverse function, this could test any inverse function of choice
-    ipuxl(A);
+    getri_uxlinv_recursive(A);
     
     // swap columns of X to find A^{-1} since A^{-1}=X P
     for(idx_t j=n-idx_t(1);j!=idx_t(-1);j--){
