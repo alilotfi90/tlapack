@@ -76,8 +76,8 @@ int ipuxl( matrix_t& A){
         trsm(Side::Left,Uplo::Upper,Op::NoTrans,Diag::NonUnit,T(1),X11,X10);
 
         //step2:
-        // X01 <--- -X00^{-1}X01
-        trsm(Side::Left,Uplo::Upper,Op::NoTrans,Diag::NonUnit,T(-1),X00,X01);
+        // X01 <--- X00^{-1}X01
+        trsm(Side::Left,Uplo::Upper,Op::NoTrans,Diag::NonUnit,T(1),X00,X01);
         
 
         //step3:
@@ -86,25 +86,27 @@ int ipuxl( matrix_t& A){
         int info=ipuxl(X00);
         if(info!=0){
             std::cout<<"error";
+            std::cout<<info;
             return info;
         }
 
         //step4:
         // X00 <--X00 + X01*X10
-        gemm(Op::NoTrans,Op::NoTrans,T(1),X01,X10,T(1),X00);
+        gemm(Op::NoTrans,Op::NoTrans,T(-1),X01,X10,T(1),X00);
 
         //step5:
         //solve for X U(X11) = X01,    X01<---X
         trsm(Side::Right,Uplo::Upper,Op::NoTrans,Diag::NonUnit,T(1),X11,X01);
         
         //step6:
-        trmm(Side::Right,Uplo::Lower,Op::NoTrans,Diag::Unit,T(1),X11,X01);
+        trmm(Side::Right,Uplo::Lower,Op::NoTrans,Diag::Unit,T(-1),X11,X01);
 
         //step7:
         // recursive call
         info=ipuxl(X11);
         if(info!=0){
             std::cout<<"issue";
+            std::cout<<info;
             return info+k0;
         }
 

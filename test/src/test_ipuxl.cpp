@@ -12,6 +12,7 @@
 #include <tlapack/lapack/getrf_recursive.hpp>
 #include <testutils.hpp>
 #include <testdefinitions.hpp>
+#include "tlapack/lapack/getrf_recursive.hpp"
 
 using namespace tlapack;
 using namespace std;
@@ -34,11 +35,25 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     
     // Initialize matrices A, and A_copy to run tests on
     std::unique_ptr<T[]> A_(new T[n * n]);
-    std::unique_ptr<T[]> A_copy_(new T[n * n]);
     auto A = legacyMatrix<T, layout<matrix_t>>(n, n, &A_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
     //auto X = legacyMatrix<T, layout<matrix_t>>(n, n, &X_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
 
+    std::unique_ptr<T[]> ident_(new T[n * n]);
+    auto ident = legacyMatrix<T, layout<matrix_t>>(n, n, &ident_[0], layout<matrix_t> == Layout::ColMajor ? n : n);
     
+    for (idx_t j = 0; j < n; ++j)
+        for (idx_t i = 0; i < n; ++i){
+            if(i==j){
+                ident(i,j)=T(1);
+            }
+            else{
+                ident(i,j)=T(0);
+
+            }
+            // if(i==j){
+            //     A(i,j)=T(0);
+            // }
+        }
     // forming A, a random matrix 
     for (idx_t j = 0; j < n; ++j)
         for (idx_t i = 0; i < n; ++i){
@@ -50,6 +65,19 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     
 
     // calculate norm of A for later use in relative error
+    std::vector<idx_t> Piv( n , idx_t(0) );
+    getrf_recursive(A,Piv);
+    //
+    for (idx_t j = 0; j < n; ++j)
+        for (idx_t i = 0; i < n; ++i){
+            if(i==j){
+                A(i, j) = A(i,j)+T(n);
+            }
+            else if(i>j){
+                A(i, j) = A(i,j)/T(n);
+            }
+            
+        }
     double norma=tlapack::lange( tlapack::Norm::Max, A);
 
     // building identity matrix
@@ -91,21 +119,21 @@ TEMPLATE_LIST_TEST_CASE("LU factorization of a general m-by-n matrix, blocked", 
     // make a deep copy A
     //lacpy(Uplo::General, A, A_copy);
     
-    ipuxl(A);
+    
 
     trsm(Side::Left,Uplo::Upper,Op::NoTrans,Diag::NonUnit,T(1),U,L);
     
-    
+    ipuxl(A);
     
     
     
     // identit1 -----> A * A_copy - ident1
-    //gemm(Op::NoTrans,Op::NoTrans,real_t(1),A,A_copy,real_t(-1),L);
-    for (idx_t j = 0; j < n; ++j)
-        for (idx_t i = 0; i < n; ++i){
-            L(i,j)=L(i,j)-A(i,j);
+    gemm(Op::NoTrans,Op::NoTrans,real_t(1),A,ident,real_t(-1),L);
+    // for (idx_t j = 0; j < n; ++j)
+    //     for (idx_t i = 0; i < n; ++i){
+    //         L(i,j)=L(i,j)-A(i,j);
             
-        }
+    //     }
 
 
 
